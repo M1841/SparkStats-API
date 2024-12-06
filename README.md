@@ -4,15 +4,20 @@ I'm trying to migrate SparkStats' server-side logic to a separate web service to
 
 ## Prerequisites
 
-Either one of:
+- [Spotify developer account](https://developer.spotify.com/)
 
-- [.NET 8](https://dotnet.microsoft.com/en-us/download/dotnet/8.0)
+And either one of:
+
+- [.NET 8](https://dotnet.microsoft.com/en-us/download/dotnet/8.0) or newer
 - [Docker](https://docs.docker.com/engine/install/)
-- [Spotify developer account]()
 
 ## Configuration
 
-Create an app in your Spotify developer dashboard, and create a `.env` file with the client ID and secret
+Create an app in your Spotify developer dashboard
+
+Add `http://localhost:8080/auth/callback` to redirect URIs
+
+Create a `.env` file with the client ID and secret
 
 ```
 SPOTIFY_CLIENT_ID=your-client-id
@@ -33,7 +38,7 @@ SPOTIFY_CLIENT_SECRET=your-client-secret
 ./start -w # or ./start --watch
 ```
 
-- as a Docker container (must have Docker installed); still experimental
+- as a Docker container (must have Docker installed)
 
 ```bash
 ./start -d # or ./start --docker
