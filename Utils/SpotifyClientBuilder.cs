@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Authentication;
 using SpotifyAPI.Web;
 
-namespace SparkStatsAPI.Services;
+namespace SparkStatsAPI.Utils;
 
 public class SpotifyClientBuilder(
   IHttpContextAccessor httpContextAccessor,

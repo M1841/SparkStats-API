@@ -1,0 +1,14 @@
+#!/bin/bash
+
+case $1 in
+--docker | -d)
+  docker build . -t sparkstats-api
+  docker run -p 8080:8080 sparkstats-api
+  ;;
+--watch | -w)
+  dotnet watch run
+  ;;
+*)
+  dotnet run
+  ;;
+esac
