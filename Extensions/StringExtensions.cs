@@ -6,11 +6,11 @@ public static class StringExtensions
   {
     if (string.IsNullOrEmpty(input)) { return false; }
 
-    char firstChar = input[0];
-    char lastChar = input[^1];
+    char first = input[0];
+    char last = input[^1];
 
-    return (firstChar == '"' && lastChar == '"')
-      || (firstChar == '\'' && lastChar == '\'');
+    return (first == '"' && last == '"')
+      || (first == '\'' && last == '\'');
   }
 
   public static string Unquote(this string input)

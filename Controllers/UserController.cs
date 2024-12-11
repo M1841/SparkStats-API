@@ -9,16 +9,35 @@ namespace SparkStatsAPI.Controllers;
 [Route("[controller]")]
 [ApiController]
 public class UserController(
-  SpotifyClientBuilder spotifyClientBuilder
+  SpotifyClientBuilder builder
 ) : ControllerBase
 {
   [HttpGet("profile")]
   public async Task<IActionResult> GetProfile()
   {
-    var spotify = await _spotifyClientBuilder.BuildClient();
-    var profile = await spotify.UserProfile.Current();
+    try
+    {
+      var (spotify, error) = await _builder.BuildClient();
+      if (error != null)
+      {
+        return StatusCode(
+          StatusCodes.Status500InternalServerError,
+          error);
+      }
 
-    return Ok(profile);
+      var profile = await spotify!.UserProfile.Current();
+
+      return Ok(new Profile(
+        profile.DisplayName,
+        profile.ExternalUrls.FirstOrDefault().Value,
+        profile.Images.LastOrDefault()?.Url));
+    }
+    catch (Exception error)
+    {
+      return StatusCode(
+        StatusCodes.Status500InternalServerError,
+        error.Message);
+    }
   }
 
   [HttpGet("signout")]
@@ -28,6 +47,5 @@ public class UserController(
     return Redirect("/");
   }
 
-  private readonly SpotifyClientBuilder
-    _spotifyClientBuilder = spotifyClientBuilder;
+  private readonly SpotifyClientBuilder _builder = builder;
 }

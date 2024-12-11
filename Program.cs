@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Authentication.Cookies;
 using SpotifyAPI.Web;
-using SparkStatsAPI.Utils;
 using SpotifyAPI.Web.Http;
+using SparkStatsAPI.Utils;
 
 DotEnv.Load(Path.Combine(
   Directory.GetCurrentDirectory(),
@@ -44,8 +44,13 @@ services
     options.SaveTokens = true;
 
     var scopes = new List<string> {
-      Scopes.UserReadEmail, Scopes.UserReadPrivate, Scopes.UserTopRead
+      Scopes.UserReadCurrentlyPlaying,
+      Scopes.UserReadEmail,
+      Scopes.UserReadPrivate,
+      Scopes.UserReadRecentlyPlayed,
+      Scopes.UserTopRead
     };
+    Console.WriteLine(scopes);
     options.Scope.Add(string.Join(",", scopes));
   });
 

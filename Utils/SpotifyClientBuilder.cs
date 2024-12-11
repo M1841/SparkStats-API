@@ -4,17 +4,23 @@ using SpotifyAPI.Web;
 namespace SparkStatsAPI.Utils;
 
 public class SpotifyClientBuilder(
-  IHttpContextAccessor httpContextAccessor,
-  SpotifyClientConfig spotifyClientConfig)
+  IHttpContextAccessor accessor,
+  SpotifyClientConfig config)
 {
-  public async Task<SpotifyClient> BuildClient()
+  public async Task<(SpotifyClient?, string?)> BuildClient()
   {
-    var token = await _httpContextAccessor.HttpContext!
-      .GetTokenAsync("Spotify", "access_token");
+    var context = _accessor.HttpContext;
+    if (context == null) { return (null, "Can't access HTTP context"); }
 
-    return new SpotifyClient(_spotifyClientConfig.WithToken(token!));
+    var token = await context
+      .GetTokenAsync("Spotify", "access_token");
+    if (token == null) { return (null, "Can't fetch access token"); }
+
+    var client = new SpotifyClient(_config.WithToken(token));
+
+    return (client, null);
   }
 
-  private readonly IHttpContextAccessor _httpContextAccessor = httpContextAccessor;
-  private readonly SpotifyClientConfig _spotifyClientConfig = spotifyClientConfig;
+  private readonly IHttpContextAccessor _accessor = accessor;
+  private readonly SpotifyClientConfig _config = config;
 }

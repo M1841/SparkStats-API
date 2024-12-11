@@ -4,19 +4,19 @@ namespace SparkStatsAPI.Utils;
 
 public static class DotEnv
 {
-  public static void Load(string filePath)
+  public static void Load(string path)
   {
-    if (!File.Exists(filePath)) { return; }
+    if (!File.Exists(path)) { return; }
 
-    foreach (var line in File.ReadAllLines(filePath))
+    foreach (var line in File.ReadAllLines(path))
     {
-      var kvPair = line.Trim().Split('=',
+      var pair = line.Trim().Split('=',
         options: StringSplitOptions.RemoveEmptyEntries);
 
-      if (kvPair.Length != 2) { continue; }
+      if (pair.Length != 2) { continue; }
 
-      var key = kvPair[0].Trim();
-      var value = kvPair[1].Trim().Unquote();
+      var key = pair[0].Trim();
+      var value = pair[1].Trim().Unquote();
 
       Environment.SetEnvironmentVariable(key, value);
     }
