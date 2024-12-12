@@ -2,9 +2,9 @@ using SpotifyAPI.Web;
 
 namespace SparkStatsAPI.Utils;
 
-public static class PagingAdapter
+public static class PagingAdapter<T>
 {
-  public static Paging<T> From<T>(dynamic request)
+  public static Paging<T> From(dynamic request)
   {
     return new Paging<T>
     {

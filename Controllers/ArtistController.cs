@@ -27,10 +27,12 @@ public class ArtistController(
           error);
       }
 
-      var response = await spotify!.UserProfile.GetTopArtists(
-        new UsersTopItemsRequest(range));
+      var request = new UsersTopItemsRequest(range)
+      { Limit = 50 };
+      var response = await spotify!
+        .UserProfile.GetTopArtists(request);
 
-      var paging = PagingAdapter.From<FullArtist>(response);
+      var paging = PagingAdapter<FullArtist>.From(response);
 
       var artists = new List<ArtistSimple>();
       await foreach (var artist in spotify!.Paginate(paging))

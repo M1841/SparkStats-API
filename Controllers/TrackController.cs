@@ -107,10 +107,12 @@ public class TrackController(
           error);
       }
 
-      var response = await spotify!.UserProfile.GetTopTracks(
-        new UsersTopItemsRequest(range));
+      var request = new UsersTopItemsRequest(range)
+      { Limit = 50 };
+      var response = await spotify!
+        .UserProfile.GetTopTracks(request);
 
-      var paging = PagingAdapter.From<FullTrack>(response);
+      var paging = PagingAdapter<FullTrack>.From(response);
 
       var tracks = new List<TrackSimple>();
       await foreach (var track in spotify!.Paginate(paging))

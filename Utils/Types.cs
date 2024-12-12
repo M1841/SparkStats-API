@@ -1,11 +1,11 @@
 namespace SparkStatsAPI.Utils;
 
 public record Profile(
-  string Name, string Url, string? Picture)
+  string Name, string Url, string? PictureUrc)
 { }
 
 public record TrackSimple(
-  string Title, string Url, ArtistBase[] Artists, string? Picture)
+  string Title, string? Url, ArtistBase[] Artists, string? PictureUrl)
 { }
 
 public record ArtistBase(
@@ -13,5 +13,9 @@ public record ArtistBase(
 { }
 
 public record ArtistSimple(
-  string Name, string Url, string[] Genres, string? Picture)
+  string Name, string Url, string[] Genres, string? PictureUrl)
+{ }
+
+public record PlaylistSimple(
+  string Id, string? Title, string? Url, int TrackCount, string? PictureUrl)
 { }

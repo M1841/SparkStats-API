@@ -44,6 +44,10 @@ services
     options.SaveTokens = true;
 
     var scopes = new List<string> {
+      Scopes.PlaylistModifyPrivate,
+      Scopes.PlaylistModifyPublic,
+      Scopes.PlaylistReadCollaborative,
+      Scopes.PlaylistReadPrivate,
       Scopes.UserReadCurrentlyPlaying,
       Scopes.UserReadEmail,
       Scopes.UserReadPrivate,
