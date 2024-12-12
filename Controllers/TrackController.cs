@@ -17,7 +17,7 @@ public class TrackController(
   {
     try
     {
-      var (spotify, error) = await _builder.BuildClient();
+      var (spotify, error) = await _builder.Build();
       if (error != null)
       {
         return StatusCode(
@@ -35,12 +35,12 @@ public class TrackController(
 
       var track = (FullTrack)item;
       var artists = track.Artists.Select(
-        artist => new Artist(
+        artist => new ArtistBase(
           artist.Name,
           artist.ExternalUrls.FirstOrDefault().Value))
         .ToArray();
 
-      return Ok(new Track(
+      return Ok(new TrackSimple(
         track.Name,
         track.ExternalUrls.FirstOrDefault().Value,
         artists,
@@ -59,7 +59,7 @@ public class TrackController(
   {
     try
     {
-      var (spotify, error) = await _builder.BuildClient();
+      var (spotify, error) = await _builder.Build();
       if (error != null)
       {
         return StatusCode(
@@ -67,26 +67,27 @@ public class TrackController(
           error);
       }
 
-      var history = await spotify!.Player
+      var response = await spotify!.Player
         .GetRecentlyPlayed(new PlayerRecentlyPlayedRequest());
 
-      var tracks = new List<Track>();
-      await foreach (var item in spotify!.Paginate(history))
+      var tracks = new List<TrackSimple>();
+      await foreach (var item in spotify!.Paginate(response))
       {
         var track = item.Track;
         if (track.Type == ItemType.Track)
         {
           var artists = track.Artists.Select(
-            artist => new Artist(
+            artist => new ArtistBase(
               artist.Name,
               artist.ExternalUrls.FirstOrDefault().Value
             )).ToArray();
 
-          tracks.Add(new Track(
+          tracks.Add(new TrackSimple(
             track.Name,
             track.ExternalUrls.FirstOrDefault().Value,
             artists,
             track.Album.Images.LastOrDefault()?.Url));
+          if (tracks.Count == 50) { break; }
         }
       }
 

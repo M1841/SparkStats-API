@@ -7,7 +7,7 @@ public class SpotifyClientBuilder(
   IHttpContextAccessor accessor,
   SpotifyClientConfig config)
 {
-  public async Task<(SpotifyClient?, string?)> BuildClient()
+  public async Task<(SpotifyClient?, string?)> Build()
   {
     var context = _accessor.HttpContext;
     if (context == null) { return (null, "Can't access HTTP context"); }

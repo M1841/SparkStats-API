@@ -4,10 +4,14 @@ public record Profile(
   string Name, string Url, string? Picture)
 { }
 
-public record Track(
-  string Title, string Url, Artist[] Artists, string? Picture)
+public record TrackSimple(
+  string Title, string Url, ArtistBase[] Artists, string? Picture)
 { }
 
-public record Artist(
+public record ArtistBase(
   string Name, string Url)
+{ }
+
+public record ArtistSimple(
+  string Name, string Url, string[] Genres, string? Picture)
 { }

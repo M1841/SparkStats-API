@@ -17,7 +17,7 @@ public class UserController(
   {
     try
     {
-      var (spotify, error) = await _builder.BuildClient();
+      var (spotify, error) = await _builder.Build();
       if (error != null)
       {
         return StatusCode(

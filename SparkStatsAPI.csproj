@@ -10,9 +10,7 @@
 
   <ItemGroup>
     <PackageReference Include="AspNet.Security.OAuth.Spotify" Version="8.3.0" />
-    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="8.0.10" />
     <PackageReference Include="SpotifyAPI.Web" Version="7.2.1" />
-    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2" />
   </ItemGroup>
 
 </Project>
