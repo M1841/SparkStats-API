@@ -25,25 +25,24 @@ public class TrackController(
           error);
       }
 
-      var item = (await spotify!.Player.GetCurrentlyPlaying(
+      var response = await spotify!.Player.GetCurrentlyPlaying(
         new PlayerCurrentlyPlayingRequest(
-          PlayerCurrentlyPlayingRequest.AdditionalTypes.Track))).Item;
-      if (item.Type != ItemType.Track)
+          PlayerCurrentlyPlayingRequest.AdditionalTypes.Track));
+
+      var isPlaying = response.IsPlaying;
+      var item = response.Item;
+
+      if (!isPlaying || item.Type != ItemType.Track)
       {
         return NoContent();
       }
 
       var track = (FullTrack)item;
-      var artists = track.Artists.Select(
-        artist => new ArtistBase(
-          artist.Name,
-          artist.ExternalUrls.FirstOrDefault().Value))
-        .ToArray();
 
       return Ok(new TrackSimple(
         track.Name,
         track.ExternalUrls.FirstOrDefault().Value,
-        artists,
+        SelectArtists(track),
         track.Album.Images.LastOrDefault()?.Url));
     }
     catch (Exception error)
@@ -76,16 +75,10 @@ public class TrackController(
         var track = item.Track;
         if (track.Type == ItemType.Track)
         {
-          var artists = track.Artists.Select(
-            artist => new ArtistBase(
-              artist.Name,
-              artist.ExternalUrls.FirstOrDefault().Value
-            )).ToArray();
-
           tracks.Add(new TrackSimple(
             track.Name,
             track.ExternalUrls.FirstOrDefault().Value,
-            artists,
+            SelectArtists(track),
             track.Album.Images.LastOrDefault()?.Url));
           if (tracks.Count == 50) { break; }
         }
@@ -99,6 +92,55 @@ public class TrackController(
         StatusCodes.Status500InternalServerError,
         error.Message);
     }
+  }
+
+  [HttpGet("top")]
+  public async Task<IActionResult> GetTop(TimeRange range)
+  {
+    try
+    {
+      var (spotify, error) = await _builder.Build();
+      if (error != null)
+      {
+        return StatusCode(
+          StatusCodes.Status500InternalServerError,
+          error);
+      }
+
+      var response = await spotify!.UserProfile.GetTopTracks(
+        new UsersTopItemsRequest(range));
+
+      var paging = PagingAdapter.From<FullTrack>(response);
+
+      var tracks = new List<TrackSimple>();
+      await foreach (var track in spotify!.Paginate(paging))
+      {
+        tracks.Add(new TrackSimple(
+          track.Name,
+          track.ExternalUrls.FirstOrDefault().Value,
+          SelectArtists(track),
+          track.Album.Images.LastOrDefault()?.Url
+        ));
+        if (tracks.Count == 100) { break; }
+      }
+
+      return Ok(tracks.ToArray());
+    }
+    catch (Exception error)
+    {
+      return StatusCode(
+        StatusCodes.Status500InternalServerError,
+        error.Message);
+    }
+  }
+
+  private static ArtistBase[] SelectArtists(FullTrack track)
+  {
+    return track.Artists.Select(
+      artist => new ArtistBase(
+        artist.Name,
+        artist.ExternalUrls.FirstOrDefault().Value
+      )).ToArray();
   }
 
   private readonly SpotifyClientBuilder _builder = builder;
