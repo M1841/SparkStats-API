@@ -13,11 +13,12 @@ public class TrackController(
 ) : ControllerBase
 {
   [HttpGet("current")]
-  public async Task<IActionResult> GetCurrent()
+  public async Task<IActionResult> GetCurrent(
+    [FromHeader(Name = "Authorization")] string authHeader)
   {
     try
     {
-      var (spotify, error) = await _builder.Build();
+      var (spotify, error) = _builder.Build(authHeader);
       if (error != null)
       {
         return StatusCode(
@@ -32,7 +33,7 @@ public class TrackController(
       var isPlaying = response.IsPlaying;
       var item = response.Item;
 
-      if (!isPlaying || item.Type != ItemType.Track)
+      if (!isPlaying || item?.Type != ItemType.Track)
       {
         return NoContent();
       }
@@ -54,11 +55,12 @@ public class TrackController(
   }
 
   [HttpGet("history")]
-  public async Task<IActionResult> GetHistory()
+  public async Task<IActionResult> GetHistory(
+    [FromHeader(Name = "Authorization")] string authHeader)
   {
     try
     {
-      var (spotify, error) = await _builder.Build();
+      var (spotify, error) = _builder.Build(authHeader);
       if (error != null)
       {
         return StatusCode(
@@ -95,11 +97,12 @@ public class TrackController(
   }
 
   [HttpGet("top")]
-  public async Task<IActionResult> GetTop(TimeRange range)
+  public async Task<IActionResult> GetTop(TimeRange range,
+    [FromHeader(Name = "Authorization")] string authHeader)
   {
     try
     {
-      var (spotify, error) = await _builder.Build();
+      var (spotify, error) = _builder.Build(authHeader);
       if (error != null)
       {
         return StatusCode(

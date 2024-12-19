@@ -14,11 +14,12 @@ public class PlaylistController(
 ) : ControllerBase
 {
   [HttpGet]
-  public async Task<IActionResult> GetAll()
+  public async Task<IActionResult> GetAll(
+    [FromHeader(Name = "Authorization")] string authHeader)
   {
     try
     {
-      var (spotify, error) = await _builder.Build();
+      var (spotify, error) = _builder.Build(authHeader);
       if (error != null)
       {
         return StatusCode(
@@ -54,11 +55,12 @@ public class PlaylistController(
   }
 
   [HttpGet("shuffle")]
-  public async Task<IActionResult> Shuffle(string id)
+  public async Task<IActionResult> Shuffle(string id,
+    [FromHeader(Name = "Authorization")] string authHeader)
   {
     try
     {
-      var (spotify, error) = await _builder.Build();
+      var (spotify, error) = _builder.Build(authHeader);
       if (error != null)
       {
         return StatusCode(

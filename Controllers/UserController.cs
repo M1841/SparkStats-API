@@ -13,11 +13,12 @@ public class UserController(
 ) : ControllerBase
 {
   [HttpGet("profile")]
-  public async Task<IActionResult> GetProfile()
+  public async Task<IActionResult> GetProfile(
+    [FromHeader(Name = "Authorization")] string authHeader)
   {
     try
     {
-      var (spotify, error) = await _builder.Build();
+      var (spotify, error) = _builder.Build(authHeader);
       if (error != null)
       {
         return StatusCode(
