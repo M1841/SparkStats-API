@@ -1,4 +1,3 @@
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SpotifyAPI.Web;
 using SparkStatsAPI.Extensions;
@@ -6,7 +5,6 @@ using SparkStatsAPI.Utils;
 
 namespace SparkStatsAPI.Controllers;
 
-[Authorize("Spotify")]
 [Route("[controller]")]
 [ApiController]
 public class PlaylistController(

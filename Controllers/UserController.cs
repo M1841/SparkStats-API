@@ -1,11 +1,9 @@
 using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SparkStatsAPI.Utils;
 
 namespace SparkStatsAPI.Controllers;
 
-[Authorize("Spotify")]
 [Route("[controller]")]
 [ApiController]
 public class UserController(
