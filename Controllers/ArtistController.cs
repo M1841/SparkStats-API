@@ -1,13 +1,10 @@
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SpotifyAPI.Web;
 using SparkStatsAPI.Extensions;
 using SparkStatsAPI.Utils;
-using SpotifyAPI.Web.Http;
 
 namespace SparkStatsAPI.Controllers;
 
-[Authorize("Spotify")]
 [Route("[controller]")]
 [ApiController]
 public class ArtistController(
@@ -15,11 +12,13 @@ public class ArtistController(
 ) : ControllerBase
 {
   [HttpGet("top")]
-  public async Task<IActionResult> GetTop(TimeRange range)
+  public async Task<IActionResult> GetTop(
+    [FromQuery] TimeRange range,
+    [FromHeader(Name = "Authorization")] string authHeader)
   {
     try
     {
-      var (spotify, error) = await _builder.Build();
+      var (spotify, error) = _builder.Build(authHeader);
       if (error != null)
       {
         return StatusCode(

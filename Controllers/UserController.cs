@@ -1,11 +1,9 @@
 using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SparkStatsAPI.Utils;
 
 namespace SparkStatsAPI.Controllers;
 
-[Authorize("Spotify")]
 [Route("[controller]")]
 [ApiController]
 public class UserController(
@@ -13,11 +11,12 @@ public class UserController(
 ) : ControllerBase
 {
   [HttpGet("profile")]
-  public async Task<IActionResult> GetProfile()
+  public async Task<IActionResult> GetProfile(
+    [FromHeader(Name = "Authorization")] string authHeader)
   {
     try
     {
-      var (spotify, error) = await _builder.Build();
+      var (spotify, error) = _builder.Build(authHeader);
       if (error != null)
       {
         return StatusCode(

@@ -1,7 +1,7 @@
 namespace SparkStatsAPI.Utils;
 
 public record Profile(
-  string Name, string Url, string? PictureUrc)
+  string Name, string Url, string? PictureUrl)
 { }
 
 public record TrackSimple(
