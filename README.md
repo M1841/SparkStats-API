@@ -5,7 +5,7 @@ Migrating SparkStats' server-side logic to a separate web service to make future
 ## Prerequisites
 
 - [Spotify developer account](https://developer.spotify.com/)
-- a SparkStats Web instance (get one from [GitHub](https://github.com/m1841/sparkstats-web) or [GitLab](https://gitlab.com/mihai_muresan/sparkstats-web))
+- a SparkStats Web instance - get one from [GitHub](https://github.com/m1841/sparkstats-web) or [GitLab](https://gitlab.com/mihai_muresan/sparkstats-web)
 
 And either one of:
 
@@ -20,7 +20,7 @@ Add `http://localhost:8080/auth/callback` to redirect URIs
 
 Create a `.env` file with the client ID and secret and other necessary data
 
-```
+```bash
 SPOTIFY_CLIENT_ID=your-client-id
 SPOTIFY_CLIENT_SECRET=your-client-secret
 PORT=8080
