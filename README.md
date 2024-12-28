@@ -1,6 +1,6 @@
 # SparkStats API
 
-I'm trying to migrate SparkStats' server-side logic to a separate web service to make my future plans for the projects easier, and using C# because why not
+Migrating SparkStats' server-side logic to a separate web service to make future enhancement plans easier.
 
 ## Prerequisites
 

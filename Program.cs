@@ -9,6 +9,16 @@ DotEnv.Load(Path.Combine(
 var builder = WebApplication.CreateBuilder(args);
 var services = builder.Services;
 
+services.AddCors(options =>
+{
+  options.AddDefaultPolicy(policy =>
+  {
+    policy.WithOrigins(
+      Environment.GetEnvironmentVariable("FRONTEND_URL")!)
+      .AllowAnyHeader()
+      .AllowAnyMethod();
+  });
+});
 services.AddSingleton(
   SpotifyClientConfig
   .CreateDefault()
@@ -23,7 +33,6 @@ var app = builder.Build();
 
 app.UseHttpsRedirection();
 app.MapControllers();
-app.UseAuthentication();
-app.UseAuthorization();
+app.UseCors();
 
 app.Run();
