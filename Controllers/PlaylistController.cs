@@ -37,8 +37,8 @@ public class PlaylistController(
           playlist.Id!,
           playlist.Name,
           playlist.ExternalUrls?.FirstOrDefault().Value,
-          playlist.Tracks?.Total ?? 0,
-          playlist.Images?.LastOrDefault()?.Url
+          playlist.Images?.LastOrDefault()?.Url,
+          playlist.Tracks?.Total ?? 0
         ));
       }
 
@@ -117,8 +117,8 @@ public class PlaylistController(
         newPlaylist.Id,
         newPlaylist.Name,
         newPlaylist.ExternalUrls?.FirstOrDefault().Value,
-        tracks.Count,
-        newPlaylist.Images?.LastOrDefault()?.Url
+        newPlaylist.Images?.LastOrDefault()?.Url,
+        tracks.Count
       ));
     }
     catch (Exception error)

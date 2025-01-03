@@ -37,10 +37,11 @@ public class ArtistController(
       await foreach (var artist in spotify!.Paginate(paging))
       {
         artists.Add(new ArtistSimple(
+          artist.Id,
           artist.Name,
           artist.ExternalUrls.FirstOrDefault().Value,
-          SelectGenres(artist),
-          artist.Images.LastOrDefault()?.Url
+          artist.Images.LastOrDefault()?.Url,
+          SelectGenres(artist)
         ));
         if (artists.Count == 100) { break; }
       }

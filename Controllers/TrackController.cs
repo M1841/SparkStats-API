@@ -28,8 +28,8 @@ public class TrackController(
         new PlayerCurrentlyPlayingRequest(
           PlayerCurrentlyPlayingRequest.AdditionalTypes.Track));
 
-      var isPlaying = response.IsPlaying;
-      var item = response.Item;
+      var isPlaying = response?.IsPlaying ?? false;
+      var item = response?.Item ?? null;
 
       if (!isPlaying || item?.Type != ItemType.Track)
       {
@@ -39,10 +39,11 @@ public class TrackController(
       var track = (FullTrack)item;
 
       return Ok(new TrackSimple(
+        track.Id,
         track.Name,
         track.ExternalUrls.FirstOrDefault().Value,
-        SelectArtists(track),
-        track.Album.Images.LastOrDefault()?.Url));
+        track.Album.Images.LastOrDefault()?.Url,
+        SelectArtists(track)));
     }
     catch (Exception error)
     {
@@ -76,10 +77,11 @@ public class TrackController(
         if (track.Type == ItemType.Track)
         {
           tracks.Add(new TrackSimple(
+            track.Id,
             track.Name,
             track.ExternalUrls.FirstOrDefault().Value,
-            SelectArtists(track),
-            track.Album.Images.LastOrDefault()?.Url));
+            track.Album.Images.LastOrDefault()?.Url,
+            SelectArtists(track)));
           if (tracks.Count == 50) { break; }
         }
       }
@@ -119,10 +121,11 @@ public class TrackController(
       await foreach (var track in spotify!.Paginate(paging))
       {
         tracks.Add(new TrackSimple(
+          track.Id,
           track.Name,
           track.ExternalUrls.FirstOrDefault().Value,
-          SelectArtists(track),
-          track.Album.Images.LastOrDefault()?.Url
+          track.Album.Images.LastOrDefault()?.Url,
+          SelectArtists(track)
         ));
         if (tracks.Count == 100) { break; }
       }
