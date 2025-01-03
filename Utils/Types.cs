@@ -27,3 +27,6 @@ public record PlaylistSimple(
   string? Url,
   int TrackCount,
   string? PictureUrl);
+
+public record RefreshRequest(
+  string RefreshToken);
