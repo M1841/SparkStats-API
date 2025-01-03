@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
 using SpotifyAPI.Web;
 using SpotifyAPI.Web.Auth;
+using Swan;
+using SparkStatsAPI.Utils;
 
 namespace SparkStatsAPI.Controllers;
 
@@ -34,6 +36,32 @@ public class AuthController : ControllerBase
     return Redirect(request.ToUri().ToString());
   }
 
+  [HttpPost("refresh")]
+  public async Task<IActionResult> Refresh([FromBody] RefreshRequest request)
+  {
+    try
+    {
+      var response = await new OAuthClient().RequestToken(
+        new AuthorizationCodeRefreshRequest(
+          _clientId,
+          _clientSecret,
+          request.RefreshToken));
+
+      var expiresAt = DateTime.UtcNow.AddSeconds(response.ExpiresIn).ToUnixEpochDate() * 1000;
+      return Ok(new
+      {
+        response.AccessToken,
+        ExpiresAt = expiresAt,
+      });
+    }
+    catch (Exception error)
+    {
+      return StatusCode(
+        StatusCodes.Status500InternalServerError,
+        error.Message);
+    }
+  }
+
   [HttpGet("callback")]
   public async Task<IActionResult> Callback([FromQuery] string code)
   {
@@ -44,7 +72,8 @@ public class AuthController : ControllerBase
       code,
       new Uri($"{_backendUrl}/auth/callback")));
 
-    return Redirect($"{_frontendUrl}/auth-callback?access_token={response.AccessToken}&refresh_token={response.RefreshToken}");
+    var expiresAt = DateTime.UtcNow.AddSeconds(response.ExpiresIn).ToUnixEpochDate();
+    return Redirect($"{_frontendUrl}/auth-callback?access_token={response.AccessToken}&refresh_token={response.RefreshToken}&expires_at={expiresAt}");
   }
 
   private readonly string _clientId = Environment
