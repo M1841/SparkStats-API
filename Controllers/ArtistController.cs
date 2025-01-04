@@ -18,23 +18,24 @@ public class ArtistController(
   {
     try
     {
-      var (spotify, error) = _builder.Build(authHeader);
-      if (error != null)
+      var result = _builder.Build(authHeader);
+      if (!result.IsSuccess)
       {
         return StatusCode(
-          StatusCodes.Status500InternalServerError,
-          error);
+          result.Error!.Status,
+          result.Error.Message);
       }
+      SpotifyClient? spotify = result.Ok!;
 
       var request = new UsersTopItemsRequest(range)
       { Limit = 50 };
-      var response = await spotify!
+      var response = await spotify
         .UserProfile.GetTopArtists(request);
 
       var paging = PagingAdapter<FullArtist>.From(response);
 
       var artists = new List<ArtistSimple>();
-      await foreach (var artist in spotify!.Paginate(paging))
+      await foreach (var artist in spotify.Paginate(paging))
       {
         artists.Add(new ArtistSimple(
           artist.Id,
@@ -47,6 +48,10 @@ public class ArtistController(
       }
 
       return Ok(artists.ToArray());
+    }
+    catch (APIUnauthorizedException error)
+    {
+      return Unauthorized(error.Message);
     }
     catch (Exception error)
     {

@@ -16,15 +16,16 @@ public class TrackController(
   {
     try
     {
-      var (spotify, error) = _builder.Build(authHeader);
-      if (error != null)
+      var result = _builder.Build(authHeader);
+      if (!result.IsSuccess)
       {
         return StatusCode(
-          StatusCodes.Status500InternalServerError,
-          error);
+          result.Error!.Status,
+          result.Error.Message);
       }
+      var spotify = result.Ok!;
 
-      var response = await spotify!.Player.GetCurrentlyPlaying(
+      var response = await spotify.Player.GetCurrentlyPlaying(
         new PlayerCurrentlyPlayingRequest(
           PlayerCurrentlyPlayingRequest.AdditionalTypes.Track));
 
@@ -45,6 +46,10 @@ public class TrackController(
         track.Album.Images.LastOrDefault()?.Url,
         SelectArtists(track)));
     }
+    catch (APIUnauthorizedException error)
+    {
+      return Unauthorized(error.Message);
+    }
     catch (Exception error)
     {
       return StatusCode(
@@ -59,19 +64,20 @@ public class TrackController(
   {
     try
     {
-      var (spotify, error) = _builder.Build(authHeader);
-      if (error != null)
+      var result = _builder.Build(authHeader);
+      if (!result.IsSuccess)
       {
         return StatusCode(
-          StatusCodes.Status500InternalServerError,
-          error);
+          result.Error!.Status,
+          result.Error.Message);
       }
+      var spotify = result.Ok!;
 
-      var response = await spotify!.Player
+      var response = await spotify.Player
         .GetRecentlyPlayed(new PlayerRecentlyPlayedRequest());
 
       var tracks = new List<TrackSimple>();
-      await foreach (var item in spotify!.Paginate(response))
+      await foreach (var item in spotify.Paginate(response))
       {
         var track = item.Track;
         if (track.Type == ItemType.Track)
@@ -88,6 +94,10 @@ public class TrackController(
 
       return Ok(tracks.ToArray());
     }
+    catch (APIUnauthorizedException error)
+    {
+      return Unauthorized(error.Message);
+    }
     catch (Exception error)
     {
       return StatusCode(
@@ -102,23 +112,24 @@ public class TrackController(
   {
     try
     {
-      var (spotify, error) = _builder.Build(authHeader);
-      if (error != null)
+      var result = _builder.Build(authHeader);
+      if (!result.IsSuccess)
       {
         return StatusCode(
-          StatusCodes.Status500InternalServerError,
-          error);
+          result.Error!.Status,
+          result.Error.Message);
       }
+      var spotify = result.Ok!;
 
       var request = new UsersTopItemsRequest(range)
       { Limit = 50 };
-      var response = await spotify!
+      var response = await spotify
         .UserProfile.GetTopTracks(request);
 
       var paging = PagingAdapter<FullTrack>.From(response);
 
       var tracks = new List<TrackSimple>();
-      await foreach (var track in spotify!.Paginate(paging))
+      await foreach (var track in spotify.Paginate(paging))
       {
         tracks.Add(new TrackSimple(
           track.Id,
@@ -131,6 +142,10 @@ public class TrackController(
       }
 
       return Ok(tracks.ToArray());
+    }
+    catch (APIUnauthorizedException error)
+    {
+      return Unauthorized(error.Message);
     }
     catch (Exception error)
     {

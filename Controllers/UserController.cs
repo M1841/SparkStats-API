@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Mvc;
 using SparkStatsAPI.Utils;
+using SpotifyAPI.Web;
 
 namespace SparkStatsAPI.Controllers;
 
@@ -16,21 +17,26 @@ public class UserController(
   {
     try
     {
-      var (spotify, error) = _builder.Build(authHeader);
-      if (error != null)
+      var result = _builder.Build(authHeader);
+      if (!result.IsSuccess)
       {
         return StatusCode(
-          StatusCodes.Status500InternalServerError,
-          error);
+          result.Error!.Status,
+          result.Error.Message);
       }
+      var spotify = result.Ok!;
 
-      var profile = await spotify!.UserProfile.Current();
+      var profile = await spotify.UserProfile.Current();
 
       return Ok(new UserProfile(
         profile.Id,
         profile.DisplayName,
         profile.ExternalUrls.FirstOrDefault().Value,
         profile.Images.LastOrDefault()?.Url));
+    }
+    catch (APIUnauthorizedException error)
+    {
+      return Unauthorized(error.Message);
     }
     catch (Exception error)
     {

@@ -17,21 +17,22 @@ public class PlaylistController(
   {
     try
     {
-      var (spotify, error) = _builder.Build(authHeader);
-      if (error != null)
+      var result = _builder.Build(authHeader);
+      if (!result.IsSuccess)
       {
         return StatusCode(
-          StatusCodes.Status500InternalServerError,
-          error);
+          result.Error!.Status,
+          result.Error.Message);
       }
+      var spotify = result.Ok!;
 
       var request = new PlaylistCurrentUsersRequest()
       { Limit = 50 };
-      var paging = await spotify!
+      var paging = await spotify
         .Playlists.CurrentUsers(request);
 
       var playlists = new List<PlaylistSimple>();
-      await foreach (var playlist in spotify!.Paginate(paging))
+      await foreach (var playlist in spotify.Paginate(paging))
       {
         playlists.Add(new PlaylistSimple(
           playlist.Id!,
@@ -43,6 +44,10 @@ public class PlaylistController(
       }
 
       return Ok(playlists.ToArray());
+    }
+    catch (APIUnauthorizedException error)
+    {
+      return Unauthorized(error.Message);
     }
     catch (Exception error)
     {
@@ -58,35 +63,36 @@ public class PlaylistController(
   {
     try
     {
-      var (spotify, error) = _builder.Build(authHeader);
-      if (error != null)
+      var result = _builder.Build(authHeader);
+      if (!result.IsSuccess)
       {
         return StatusCode(
-          StatusCodes.Status500InternalServerError,
-          error);
+          result.Error!.Status,
+          result.Error.Message);
       }
+      var spotify = result.Ok!;
 
-      var playlist = await spotify!
+      var playlist = await spotify
         .Playlists.Get(id);
-      var userId = (await spotify!.UserProfile.Current()).Id;
+      var userId = (await spotify.UserProfile.Current()).Id;
 
       var createRequest = new PlaylistCreateRequest(
         (playlist.Name ?? "") + " (Shuffled)")
       { Public = false };
 
-      var newPlaylist = await spotify!
+      var newPlaylist = await spotify
         .Playlists.Create(userId, createRequest);
 
       if (newPlaylist.Id == null)
       {
         throw new Exception("Can't create new playlist");
       }
-      var paging = await spotify!
+      var paging = await spotify
       .Playlists.GetItems(id);
 
       var tracks = new List<string>();
       await foreach (var item
-        in spotify!.Paginate(paging))
+        in spotify.Paginate(paging))
       {
         if (item.Track.Type == ItemType.Track)
         {
@@ -108,7 +114,7 @@ public class PlaylistController(
       var tasks = chunks.Select(chunk =>
       {
         var request = new PlaylistAddItemsRequest(chunk);
-        return spotify!.Playlists
+        return spotify.Playlists
           .AddItems(newPlaylist.Id, request);
       });
       await Task.WhenAll(tasks);
@@ -120,6 +126,10 @@ public class PlaylistController(
         newPlaylist.Images?.LastOrDefault()?.Url,
         tracks.Count
       ));
+    }
+    catch (APIUnauthorizedException error)
+    {
+      return Unauthorized(error.Message);
     }
     catch (Exception error)
     {
