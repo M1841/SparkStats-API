@@ -1,6 +1,6 @@
 namespace SparkStatsAPI.Utils;
 
-public record UserProfile(
+public record UserProfileSimple(
   string Id,
   string Name,
   string Url,
@@ -29,6 +29,7 @@ public record PlaylistSimple(
   string? Name,
   string? Url,
   string? PictureUrl,
+  UserProfileSimple Owner,
   int TrackCount);
 
 public record RefreshRequest(

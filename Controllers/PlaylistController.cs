@@ -39,6 +39,12 @@ public class PlaylistController(
           playlist.Name,
           playlist.ExternalUrls?.FirstOrDefault().Value,
           playlist.Images?.LastOrDefault()?.Url,
+          new UserProfileSimple(
+            "",
+            playlist.Owner?.DisplayName ?? "unknown",
+            playlist.Owner?.ExternalUrls?.FirstOrDefault().Value ?? "",
+            ""
+          ),
           playlist.Tracks?.Total ?? 0
         ));
       }
@@ -124,6 +130,12 @@ public class PlaylistController(
         newPlaylist.Name,
         newPlaylist.ExternalUrls?.FirstOrDefault().Value,
         newPlaylist.Images?.LastOrDefault()?.Url,
+        new UserProfileSimple(
+          "",
+          newPlaylist.Owner?.DisplayName ?? "unknown",
+          newPlaylist.Owner?.ExternalUrls?.FirstOrDefault().Value ?? "",
+          ""
+        ),
         tracks.Count
       ));
     }

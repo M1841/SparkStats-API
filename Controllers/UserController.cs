@@ -28,7 +28,7 @@ public class UserController(
 
       var profile = await spotify.UserProfile.Current();
 
-      return Ok(new UserProfile(
+      return Ok(new UserProfileSimple(
         profile.Id,
         profile.DisplayName,
         profile.ExternalUrls.FirstOrDefault().Value,
