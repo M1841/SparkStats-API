@@ -39,11 +39,9 @@ public class PlaylistController(
           playlist.Name,
           playlist.ExternalUrls?.FirstOrDefault().Value,
           playlist.Images?.LastOrDefault()?.Url,
-          new UserProfileSimple(
-            "",
-            playlist.Owner?.DisplayName ?? "unknown",
-            playlist.Owner?.ExternalUrls?.FirstOrDefault().Value ?? "",
-            ""
+          new UserProfileBase(
+            playlist.Owner?.DisplayName ?? "",
+            playlist.Owner?.ExternalUrls?.FirstOrDefault().Value ?? ""
           ),
           playlist.Tracks?.Total ?? 0
         ));
@@ -63,8 +61,9 @@ public class PlaylistController(
     }
   }
 
-  [HttpGet("shuffle")]
-  public async Task<IActionResult> Shuffle(string id,
+  [HttpPost("shuffle")]
+  public async Task<IActionResult> Shuffle(
+    [FromBody] ShuffleRequest request,
     [FromHeader(Name = "Authorization")] string authHeader)
   {
     try
@@ -77,13 +76,14 @@ public class PlaylistController(
           result.Error.Message);
       }
       var spotify = result.Ok!;
+      var id = request.Id;
 
       var playlist = await spotify
         .Playlists.Get(id);
       var userId = (await spotify.UserProfile.Current()).Id;
 
       var createRequest = new PlaylistCreateRequest(
-        (playlist.Name ?? "") + " (Shuffled)")
+        (playlist.Name ?? "") + " - Shuffled")
       { Public = false };
 
       var newPlaylist = await spotify
@@ -125,16 +125,16 @@ public class PlaylistController(
       });
       await Task.WhenAll(tasks);
 
+      var pictureUrl = (await spotify.Playlists.Get(newPlaylist.Id)).Images?.LastOrDefault()?.Url;
+
       return Ok(new PlaylistSimple(
         newPlaylist.Id,
         newPlaylist.Name,
         newPlaylist.ExternalUrls?.FirstOrDefault().Value,
-        newPlaylist.Images?.LastOrDefault()?.Url,
-        new UserProfileSimple(
-          "",
-          newPlaylist.Owner?.DisplayName ?? "unknown",
-          newPlaylist.Owner?.ExternalUrls?.FirstOrDefault().Value ?? "",
-          ""
+        pictureUrl,
+        new UserProfileBase(
+          playlist.Owner?.DisplayName ?? "",
+          playlist.Owner?.ExternalUrls?.FirstOrDefault().Value ?? ""
         ),
         tracks.Count
       ));

@@ -1,10 +1,14 @@
 namespace SparkStatsAPI.Utils;
 
+public record UserProfileBase(
+  string Name,
+  string Url);
+
 public record UserProfileSimple(
   string Id,
   string Name,
   string Url,
-  string? PictureUrl);
+  string? PictureUrl) : UserProfileBase(Name, Url);
 
 public record TrackSimple(
   string Id,
@@ -29,8 +33,11 @@ public record PlaylistSimple(
   string? Name,
   string? Url,
   string? PictureUrl,
-  UserProfileSimple Owner,
+  UserProfileBase Owner,
   int TrackCount);
 
 public record RefreshRequest(
   string RefreshToken);
+
+public record ShuffleRequest(
+  string Id);
