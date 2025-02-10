@@ -1,20 +1,37 @@
 using SpotifyAPI.Web;
 
-namespace SparkStatsAPI.Utils;
-
-public static class PagingAdapter<T>
+namespace SparkStatsAPI
 {
-  public static Paging<T> From(dynamic request)
+  namespace Utils
   {
-    return new Paging<T>
+    public static class PagingAdapter
     {
-      Href = request.Href,
-      Items = request.Items,
-      Limit = request.Limit,
-      Next = request.Next,
-      Offset = request.Offset,
-      Previous = request.Previous,
-      Total = request.Total
-    };
+      public static Paging<FullArtist> ArtistPages(UsersTopArtistsResponse response)
+      {
+        return new Paging<FullArtist>
+        {
+          Href = response.Href,
+          Items = response.Items,
+          Limit = response.Limit,
+          Next = response.Next,
+          Offset = response.Offset,
+          Previous = response.Previous,
+          Total = response.Total
+        };
+      }
+      public static Paging<FullTrack> TrackPages(UsersTopTracksResponse response)
+      {
+        return new Paging<FullTrack>
+        {
+          Href = response.Href,
+          Items = response.Items,
+          Limit = response.Limit,
+          Next = response.Next,
+          Offset = response.Offset,
+          Previous = response.Previous,
+          Total = response.Total
+        };
+      }
+    }
   }
 }

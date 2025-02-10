@@ -1,16 +1,20 @@
-namespace SparkStatsAPI.Extensions;
-
-public static class ListExtensions
+namespace SparkStatsAPI
 {
-  public static List<T> Shuffle<T>(this List<T> input)
+  namespace Extensions
   {
-    var random = new Random();
-    for (var i = input.Count - 1; i >= 0; i--)
+    public static class ListExtensions
     {
-      var j = random.Next(i + 1);
-      (input[j], input[i]) = (input[i], input[j]);
-    }
+      public static List<T> Shuffle<T>(this List<T> input)
+      {
+        var random = new Random();
+        for (var i = input.Count - 1; i >= 0; i--)
+        {
+          var j = random.Next(i + 1);
+          (input[j], input[i]) = (input[i], input[j]);
+        }
 
-    return input;
+        return input;
+      }
+    }
   }
 }

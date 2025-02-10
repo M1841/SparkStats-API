@@ -3,55 +3,59 @@ using Microsoft.AspNetCore.Mvc;
 using SparkStatsAPI.Utils;
 using SpotifyAPI.Web;
 
-namespace SparkStatsAPI.Controllers;
-
-[Route("[controller]")]
-[ApiController]
-public class UserController(
-  SpotifyClientBuilder builder
-) : ControllerBase
+namespace SparkStatsAPI
 {
-  [HttpGet("profile")]
-  public async Task<IActionResult> GetProfile(
-    [FromHeader(Name = "Authorization")] string authHeader)
+  namespace Controllers
   {
-    try
+    [Route("[controller]")]
+    [ApiController]
+    public class UserController(
+      SpotifyClientBuilder builder
+    ) : ControllerBase
     {
-      var result = _builder.Build(authHeader);
-      if (!result.IsSuccess)
+      [HttpGet("profile")]
+      public async Task<IActionResult> GetProfile(
+        [FromHeader(Name = "Authorization")] string authHeader)
       {
-        return StatusCode(
-          result.Error!.Status,
-          result.Error.Message);
+        try
+        {
+          var result = _builder.Build(authHeader);
+          if (!result.IsSuccess)
+          {
+            return StatusCode(
+              result.Error!.Status,
+              result.Error.Message);
+          }
+          var spotify = result.Ok!;
+
+          var profile = await spotify.UserProfile.Current();
+
+          return Ok(new UserProfileSimple(
+            profile.Id,
+            profile.DisplayName,
+            profile.ExternalUrls.FirstOrDefault().Value,
+            profile.Images.LastOrDefault()?.Url));
+        }
+        catch (APIUnauthorizedException error)
+        {
+          return Unauthorized(error.Message);
+        }
+        catch (Exception error)
+        {
+          return StatusCode(
+            StatusCodes.Status500InternalServerError,
+            error.Message);
+        }
       }
-      var spotify = result.Ok!;
 
-      var profile = await spotify.UserProfile.Current();
+      [HttpGet("signout")]
+      public async Task<IActionResult> LogOut()
+      {
+        await HttpContext.SignOutAsync();
+        return Redirect("/");
+      }
 
-      return Ok(new UserProfileSimple(
-        profile.Id,
-        profile.DisplayName,
-        profile.ExternalUrls.FirstOrDefault().Value,
-        profile.Images.LastOrDefault()?.Url));
-    }
-    catch (APIUnauthorizedException error)
-    {
-      return Unauthorized(error.Message);
-    }
-    catch (Exception error)
-    {
-      return StatusCode(
-        StatusCodes.Status500InternalServerError,
-        error.Message);
+      private readonly SpotifyClientBuilder _builder = builder;
     }
   }
-
-  [HttpGet("signout")]
-  public async Task<IActionResult> LogOut()
-  {
-    await HttpContext.SignOutAsync();
-    return Redirect("/");
-  }
-
-  private readonly SpotifyClientBuilder _builder = builder;
 }

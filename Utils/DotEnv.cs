@@ -1,24 +1,32 @@
 using SparkStatsAPI.Extensions;
 
-namespace SparkStatsAPI.Utils;
-
-public static class DotEnv
+namespace SparkStatsAPI
 {
-  public static void Load(string path)
+  namespace Utils
   {
-    if (!File.Exists(path)) { return; }
-
-    foreach (var line in File.ReadAllLines(path))
+    public static class DotEnv
     {
-      var pair = line.Trim().Split('=',
-        options: StringSplitOptions.RemoveEmptyEntries);
+      public static void Load()
+      {
+        var path = Path.Combine(
+          Directory.GetCurrentDirectory(),
+          ".env");
 
-      if (pair.Length != 2) { continue; }
+        if (!File.Exists(path)) { return; }
 
-      var key = pair[0].Trim();
-      var value = pair[1].Trim().Unquote();
+        foreach (var line in File.ReadAllLines(path))
+        {
+          var pair = line.Trim().Split('=',
+            options: StringSplitOptions.RemoveEmptyEntries);
 
-      Environment.SetEnvironmentVariable(key, value);
+          if (pair.Length != 2) { continue; }
+
+          var key = pair[0].Trim();
+          var value = pair[1].Trim().Unquote();
+
+          Environment.SetEnvironmentVariable(key, value);
+        }
+      }
     }
   }
 }

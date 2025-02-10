@@ -1,38 +1,20 @@
-using SpotifyAPI.Web;
-using SpotifyAPI.Web.Http;
 using SparkStatsAPI.Utils;
 
-DotEnv.Load(Path.Combine(
-  Directory.GetCurrentDirectory(),
-  ".env"));
-
-var builder = WebApplication.CreateBuilder(args);
-var services = builder.Services;
-
-services.AddCors(options =>
+namespace SparkStatsAPI
 {
-  options.AddDefaultPolicy(policy =>
+  public static class Program
   {
-    policy.WithOrigins(
-      Environment.GetEnvironmentVariable("FRONTEND_URL")!)
-      .AllowAnyHeader()
-      .AllowAnyMethod();
-  });
-});
-services.AddSingleton(
-  SpotifyClientConfig
-  .CreateDefault()
-  .WithHTTPLogger(new SimpleConsoleHTTPLogger())
-);
-services.AddScoped<SpotifyClientBuilder>();
+    public static void Main(string[] args)
+    {
+      DotEnv.Load();
+      CreateHostBuilder(args).Build().Run();
+    }
 
-services.AddControllers();
-services.AddEndpointsApiExplorer();
-
-var app = builder.Build();
-
-app.UseHttpsRedirection();
-app.MapControllers();
-app.UseCors();
-
-app.Run();
+    public static IHostBuilder CreateHostBuilder(string[] args) =>
+      Host.CreateDefaultBuilder(args)
+        .ConfigureWebHostDefaults(webBuilder =>
+        {
+          webBuilder.UseStartup<Startup>();
+        });
+  }
+}

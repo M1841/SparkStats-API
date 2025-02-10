@@ -1,27 +1,31 @@
 using SpotifyAPI.Web;
 
-namespace SparkStatsAPI.Utils;
-
-public class SpotifyClientBuilder(
-  SpotifyClientConfig config)
+namespace SparkStatsAPI
 {
-  public Result<SpotifyClient> Build(string authHeader)
+  namespace Utils
   {
-    if (string.IsNullOrEmpty(authHeader)
-      || !authHeader.StartsWith("Bearer "))
+    public class SpotifyClientBuilder(
+      SpotifyClientConfig config)
     {
-      return Result<SpotifyClient>.Failure(
-        new Error(
-          "Invalid authorization header",
-          StatusCodes.Status400BadRequest));
+      public Result<SpotifyClient> Build(string authHeader)
+      {
+        if (string.IsNullOrEmpty(authHeader)
+          || !authHeader.StartsWith("Bearer "))
+        {
+          return Result<SpotifyClient>.Failure(
+            new Error(
+              "Invalid authorization header",
+              StatusCodes.Status400BadRequest));
+        }
+        var token = authHeader["Bearer ".Length..];
+
+        var client = new SpotifyClient(
+          _config.WithToken(token));
+
+        return Result<SpotifyClient>.Success(client);
+      }
+
+      private readonly SpotifyClientConfig _config = config;
     }
-    var token = authHeader["Bearer ".Length..];
-
-    var client = new SpotifyClient(
-      _config.WithToken(token));
-
-    return Result<SpotifyClient>.Success(client);
   }
-
-  private readonly SpotifyClientConfig _config = config;
 }

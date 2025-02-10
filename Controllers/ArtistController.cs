@@ -3,70 +3,73 @@ using SpotifyAPI.Web;
 using SparkStatsAPI.Extensions;
 using SparkStatsAPI.Utils;
 
-namespace SparkStatsAPI.Controllers;
-
-[Route("[controller]")]
-[ApiController]
-public class ArtistController(
-  SpotifyClientBuilder builder
-) : ControllerBase
+namespace SparkStatsAPI
 {
-  [HttpGet("top")]
-  public async Task<IActionResult> GetTop(
-    [FromQuery] TimeRange range,
-    [FromHeader(Name = "Authorization")] string authHeader)
+  namespace Controllers
   {
-    try
+    [Route("[controller]")]
+    [ApiController]
+    public class ArtistController(
+      SpotifyClientBuilder builder
+    ) : ControllerBase
     {
-      var result = _builder.Build(authHeader);
-      if (!result.IsSuccess)
+      [HttpGet("top")]
+      public async Task<IActionResult> GetTop(
+        [FromQuery] TimeRange range,
+        [FromHeader(Name = "Authorization")] string authHeader)
       {
-        return StatusCode(
-          result.Error!.Status,
-          result.Error.Message);
+        try
+        {
+          var result = _builder.Build(authHeader);
+          if (!result.IsSuccess)
+          {
+            return StatusCode(
+              result.Error!.Status,
+              result.Error.Message);
+          }
+          SpotifyClient? spotify = result.Ok!;
+
+          var request = new UsersTopItemsRequest(range)
+          { Limit = 50 };
+          var response = await spotify
+            .UserProfile.GetTopArtists(request);
+
+          var paging = PagingAdapter.ArtistPages(response);
+
+          var artists = new List<ArtistSimple>();
+          await foreach (var artist in spotify.Paginate(paging))
+          {
+            artists.Add(new ArtistSimple(
+              artist.Id,
+              artist.Name,
+              artist.ExternalUrls.FirstOrDefault().Value,
+              artist.Images.LastOrDefault()?.Url,
+              SelectGenres(artist)
+            ));
+            if (artists.Count == 100) { break; }
+          }
+
+          return Ok(artists.ToArray());
+        }
+        catch (APIUnauthorizedException error)
+        {
+          return Unauthorized(error.Message);
+        }
+        catch (Exception error)
+        {
+          return StatusCode(
+            StatusCodes.Status500InternalServerError,
+            error.Message);
+        }
       }
-      SpotifyClient? spotify = result.Ok!;
 
-      var request = new UsersTopItemsRequest(range)
-      { Limit = 50 };
-      var response = await spotify
-        .UserProfile.GetTopArtists(request);
-
-      var paging = PagingAdapter<FullArtist>.From(response);
-
-      var artists = new List<ArtistSimple>();
-      await foreach (var artist in spotify.Paginate(paging))
+      private static string[] SelectGenres(FullArtist artist)
       {
-        artists.Add(new ArtistSimple(
-          artist.Id,
-          artist.Name,
-          artist.ExternalUrls.FirstOrDefault().Value,
-          artist.Images.LastOrDefault()?.Url,
-          SelectGenres(artist)
-        ));
-        if (artists.Count == 100) { break; }
+        return [.. artist
+          .Genres.Take(3)
+          .Select(genre => genre.ToTitleCase())];
       }
-
-      return Ok(artists.ToArray());
-    }
-    catch (APIUnauthorizedException error)
-    {
-      return Unauthorized(error.Message);
-    }
-    catch (Exception error)
-    {
-      return StatusCode(
-        StatusCodes.Status500InternalServerError,
-        error.Message);
+      private readonly SpotifyClientBuilder _builder = builder;
     }
   }
-
-  private static string[] SelectGenres(FullArtist artist)
-  {
-    return artist
-      .Genres.Take(3)
-      .Select(genre => genre.ToTitleCase())
-      .ToArray();
-  }
-  private readonly SpotifyClientBuilder _builder = builder;
 }
