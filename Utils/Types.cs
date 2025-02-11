@@ -30,6 +30,10 @@ namespace SparkStatsAPI
       string? PictureUrl,
       string[] Genres) : ArtistBase(Name, Url);
 
+    public record GenreSimple(
+      string Name,
+      int ArtistCount);
+
     public record PlaylistSimple(
       string Id,
       string Name,

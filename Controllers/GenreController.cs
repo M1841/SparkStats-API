@@ -48,8 +48,14 @@ namespace SparkStatsAPI
             if (genres.Count == 100) { break; }
           }
 
-          return Ok(genres.OrderByDescending(
-            (genre) => genre.Value));
+          return Ok(genres
+            .OrderByDescending(genre
+              => genre.Value)
+            .Select(genre
+              => new GenreSimple(
+                genre.Key,
+                genre.Value))
+            .ToList());
         }
         catch (APIUnauthorizedException error)
         {
