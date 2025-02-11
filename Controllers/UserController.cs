@@ -19,14 +19,14 @@ namespace SparkStatsAPI
       {
         try
         {
-          var result = _builder.Build(authHeader);
-          if (!result.IsSuccess)
+          var buildResult = _builder.Build(authHeader);
+          if (!buildResult.IsSuccess)
           {
             return StatusCode(
-              result.Error!.Status,
-              result.Error.Message);
+              buildResult.Error!.Status,
+              buildResult.Error.Message);
           }
-          var spotify = result.Ok!;
+          var spotify = buildResult.Ok!;
 
           var profile = await spotify.UserProfile.Current();
 

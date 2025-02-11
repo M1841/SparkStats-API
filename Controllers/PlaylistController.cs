@@ -19,14 +19,14 @@ namespace SparkStatsAPI
       {
         try
         {
-          var result = _builder.Build(authHeader);
-          if (!result.IsSuccess)
+          var buildResult = _builder.Build(authHeader);
+          if (!buildResult.IsSuccess)
           {
             return StatusCode(
-              result.Error!.Status,
-              result.Error.Message);
+              buildResult.Error!.Status,
+              buildResult.Error.Message);
           }
-          var spotify = result.Ok!;
+          var spotify = buildResult.Ok!;
 
           var request = new PlaylistCurrentUsersRequest()
           { Limit = 50 };
@@ -38,8 +38,8 @@ namespace SparkStatsAPI
           {
             playlists.Add(new PlaylistSimple(
               playlist.Id!,
-              playlist.Name,
-              playlist.ExternalUrls?.FirstOrDefault().Value,
+              playlist.Name!,
+              playlist.ExternalUrls?.FirstOrDefault().Value!,
               playlist.Images?.LastOrDefault()?.Url,
               new UserProfileBase(
                 playlist.Owner?.DisplayName ?? "",
@@ -70,14 +70,14 @@ namespace SparkStatsAPI
       {
         try
         {
-          var result = _builder.Build(authHeader);
-          if (!result.IsSuccess)
+          var buildResult = _builder.Build(authHeader);
+          if (!buildResult.IsSuccess)
           {
             return StatusCode(
-              result.Error!.Status,
-              result.Error.Message);
+              buildResult.Error!.Status,
+              buildResult.Error.Message);
           }
-          var spotify = result.Ok!;
+          var spotify = buildResult.Ok!;
           var id = request.Id;
 
           var playlist = await spotify
@@ -131,8 +131,8 @@ namespace SparkStatsAPI
 
           return Ok(new PlaylistSimple(
             newPlaylist.Id,
-            newPlaylist.Name,
-            newPlaylist.ExternalUrls?.FirstOrDefault().Value,
+            newPlaylist.Name!,
+            newPlaylist.ExternalUrls?.FirstOrDefault().Value!,
             pictureUrl,
             new UserProfileBase(
               playlist.Owner?.DisplayName ?? "",

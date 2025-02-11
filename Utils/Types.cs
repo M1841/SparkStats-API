@@ -32,8 +32,8 @@ namespace SparkStatsAPI
 
     public record PlaylistSimple(
       string Id,
-      string? Name,
-      string? Url,
+      string Name,
+      string Url,
       string? PictureUrl,
       UserProfileBase Owner,
       int TrackCount);

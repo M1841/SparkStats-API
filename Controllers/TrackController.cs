@@ -18,14 +18,14 @@ namespace SparkStatsAPI
       {
         try
         {
-          var result = _builder.Build(authHeader);
-          if (!result.IsSuccess)
+          var buildResult = _builder.Build(authHeader);
+          if (!buildResult.IsSuccess)
           {
             return StatusCode(
-              result.Error!.Status,
-              result.Error.Message);
+              buildResult.Error!.Status,
+              buildResult.Error.Message);
           }
-          var spotify = result.Ok!;
+          var spotify = buildResult.Ok!;
 
           var response = await spotify.Player.GetCurrentlyPlaying(
             new PlayerCurrentlyPlayingRequest(
@@ -66,14 +66,14 @@ namespace SparkStatsAPI
       {
         try
         {
-          var result = _builder.Build(authHeader);
-          if (!result.IsSuccess)
+          var buildResult = _builder.Build(authHeader);
+          if (!buildResult.IsSuccess)
           {
             return StatusCode(
-              result.Error!.Status,
-              result.Error.Message);
+              buildResult.Error!.Status,
+              buildResult.Error.Message);
           }
-          var spotify = result.Ok!;
+          var spotify = buildResult.Ok!;
 
           var response = await spotify.Player
             .GetRecentlyPlayed(new PlayerRecentlyPlayedRequest());
@@ -114,14 +114,14 @@ namespace SparkStatsAPI
       {
         try
         {
-          var result = _builder.Build(authHeader);
-          if (!result.IsSuccess)
+          var buildResult = _builder.Build(authHeader);
+          if (!buildResult.IsSuccess)
           {
             return StatusCode(
-              result.Error!.Status,
-              result.Error.Message);
+              buildResult.Error!.Status,
+              buildResult.Error.Message);
           }
-          var spotify = result.Ok!;
+          var spotify = buildResult.Ok!;
 
           var request = new UsersTopItemsRequest(range)
           { Limit = 50 };

@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
-using SpotifyAPI.Web;
-using SparkStatsAPI.Extensions;
 using SparkStatsAPI.Utils;
+using SparkStatsAPI.Extensions;
+using SpotifyAPI.Web;
 
 namespace SparkStatsAPI
 {
@@ -9,18 +9,17 @@ namespace SparkStatsAPI
   {
     [Route("[controller]")]
     [ApiController]
-    public class ArtistController(
+    public class GenreController(
       SpotifyClientBuilder builder
     ) : ControllerBase
     {
       [HttpGet("top")]
-      public async Task<IActionResult> GetTop(
-        [FromQuery] TimeRange range,
+      public async Task<IActionResult> GetTop(TimeRange range,
         [FromHeader(Name = "Authorization")] string authHeader)
       {
         try
         {
-          var buildResult = _builder.Build(authHeader);
+          var buildResult = _buider.Build(authHeader);
           if (!buildResult.IsSuccess)
           {
             return StatusCode(
@@ -31,25 +30,26 @@ namespace SparkStatsAPI
 
           var request = new UsersTopItemsRequest(range)
           { Limit = 50 };
-          var response = await spotify
-            .UserProfile.GetTopArtists(request);
+          var response = await spotify.UserProfile.GetTopArtists(request);
 
           var paging = PagingAdapter.ArtistPages(response);
 
-          var artists = new List<ArtistSimple>();
+          var genres = new Dictionary<string, int>();
           await foreach (var artist in spotify.Paginate(paging))
           {
-            artists.Add(new ArtistSimple(
-              artist.Id,
-              artist.Name,
-              artist.ExternalUrls.FirstOrDefault().Value,
-              artist.Images.LastOrDefault()?.Url,
-              SelectGenres(artist)
-            ));
-            if (artists.Count == 100) { break; }
+            foreach (var genre in artist.Genres)
+            {
+              var genreTitleCase = genre.ToTitleCase();
+              if (!genres.TryAdd(genreTitleCase, 1))
+              {
+                genres[genreTitleCase]++;
+              }
+            }
+            if (genres.Count == 100) { break; }
           }
 
-          return Ok(artists.ToArray());
+          return Ok(genres.OrderByDescending(
+            (genre) => genre.Value));
         }
         catch (APIUnauthorizedException error)
         {
@@ -62,14 +62,7 @@ namespace SparkStatsAPI
             error.Message);
         }
       }
-
-      private static string[] SelectGenres(FullArtist artist)
-      {
-        return [.. artist
-          .Genres.Take(3)
-          .Select(genre => genre.ToTitleCase())];
-      }
-      private readonly SpotifyClientBuilder _builder = builder;
+      private readonly SpotifyClientBuilder _buider = builder;
     }
   }
 }
