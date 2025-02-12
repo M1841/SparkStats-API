@@ -1,6 +1,6 @@
 # SparkStats API
 
-Migrating SparkStats' server-side logic to a separate web service to make future enhancement plans easier.
+REST API server behind a music statistics platform.
 
 ## Prerequisites
 
