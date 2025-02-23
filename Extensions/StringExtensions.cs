@@ -24,9 +24,19 @@ namespace SparkStatsAPI
 
       public static string ToTitleCase(this string input)
       {
+        if (_knownAcronyms.Contains(
+          input, StringComparer.CurrentCultureIgnoreCase))
+        {
+          return _knownAcronyms.FirstOrDefault(
+            str => str.Equals(
+              input, StringComparison.CurrentCultureIgnoreCase))!;
+        }
+
         TextInfo info = CultureInfo.CurrentCulture.TextInfo;
         return info.ToTitleCase(input);
       }
+
+      private static readonly string[] _knownAcronyms = ["EDM", "EDM Trap", "IDM", "CEDM", "UK Garage"];
     }
   }
 }

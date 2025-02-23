@@ -1,3 +1,4 @@
+using SparkStatsAPI.Services;
 using SparkStatsAPI.Utils;
 using SpotifyAPI.Web;
 using SpotifyAPI.Web.Http;
@@ -26,6 +27,13 @@ namespace SparkStatsAPI
         .WithHTTPLogger(new SimpleConsoleHTTPLogger())
       );
       services.AddScoped<SpotifyClientBuilder>();
+
+      services.AddScoped<ArtistService>();
+      services.AddScoped<AuthService>();
+      services.AddScoped<GenreService>();
+      services.AddScoped<PlaylistService>();
+      services.AddScoped<TrackService>();
+      services.AddScoped<UserService>();
 
       services.AddControllers();
       services.AddEndpointsApiExplorer();

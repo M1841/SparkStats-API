@@ -1,7 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using SpotifyAPI.Web;
-using SparkStatsAPI.Extensions;
-using SparkStatsAPI.Utils;
+using SparkStatsAPI.Services;
 
 namespace SparkStatsAPI
 {
@@ -9,67 +8,24 @@ namespace SparkStatsAPI
   {
     [Route("[controller]")]
     [ApiController]
-    public class ArtistController(
-      SpotifyClientBuilder builder
-    ) : ControllerBase
+    public class ArtistController(ArtistService artistService) : ControllerBase
     {
       [HttpGet("top")]
       public async Task<IActionResult> GetTop(
         [FromQuery] TimeRange range,
         [FromHeader(Name = "Authorization")] string authHeader)
       {
-        try
-        {
-          var buildResult = _builder.Build(authHeader);
-          if (!buildResult.IsSuccess)
-          {
-            return StatusCode(
-              buildResult.Error!.Status,
-              buildResult.Error.Message);
-          }
-          var spotify = buildResult.Ok!;
+        var result =
+          await artistService.GetTop(range, authHeader);
 
-          var request = new UsersTopItemsRequest(range)
-          { Limit = 50 };
-          var response = await spotify
-            .UserProfile.GetTopArtists(request);
-
-          var paging = PagingAdapter.ArtistPages(response);
-
-          var artists = new List<ArtistSimple>();
-          await foreach (var artist in spotify.Paginate(paging))
-          {
-            artists.Add(new ArtistSimple(
-              artist.Id,
-              artist.Name,
-              artist.ExternalUrls.FirstOrDefault().Value,
-              artist.Images.LastOrDefault()?.Url,
-              SelectGenres(artist)
-            ));
-            if (artists.Count == 100) { break; }
-          }
-
-          return Ok(artists.ToArray());
-        }
-        catch (APIUnauthorizedException error)
-        {
-          return Unauthorized(error.Message);
-        }
-        catch (Exception error)
+        if (!result.IsSuccess)
         {
           return StatusCode(
-            StatusCodes.Status500InternalServerError,
-            error.Message);
+            result.Error!.Status,
+            result.Error!.Message);
         }
+        return Ok(result.Ok!);
       }
-
-      private static string[] SelectGenres(FullArtist artist)
-      {
-        return [.. artist
-          .Genres.Take(3)
-          .Select(genre => genre.ToTitleCase())];
-      }
-      private readonly SpotifyClientBuilder _builder = builder;
     }
   }
 }

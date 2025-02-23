@@ -45,6 +45,9 @@ namespace SparkStatsAPI
     public record RefreshRequest(
       string RefreshToken);
 
+    public record RefreshResponse(
+      string AccessToken, long ExpiresAt);
+
     public record ShuffleRequest(
       string Id);
   }

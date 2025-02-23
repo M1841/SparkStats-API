@@ -1,7 +1,6 @@
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Mvc;
-using SparkStatsAPI.Utils;
-using SpotifyAPI.Web;
+using SparkStatsAPI.Services;
 
 namespace SparkStatsAPI
 {
@@ -9,43 +8,22 @@ namespace SparkStatsAPI
   {
     [Route("[controller]")]
     [ApiController]
-    public class UserController(
-      SpotifyClientBuilder builder
-    ) : ControllerBase
+    public class UserController(UserService userService) : ControllerBase
     {
       [HttpGet("profile")]
       public async Task<IActionResult> GetProfile(
         [FromHeader(Name = "Authorization")] string authHeader)
       {
-        try
-        {
-          var buildResult = _builder.Build(authHeader);
-          if (!buildResult.IsSuccess)
-          {
-            return StatusCode(
-              buildResult.Error!.Status,
-              buildResult.Error.Message);
-          }
-          var spotify = buildResult.Ok!;
+        var result =
+          await userService.GetProfile(authHeader);
 
-          var profile = await spotify.UserProfile.Current();
-
-          return Ok(new UserProfileSimple(
-            profile.Id,
-            profile.DisplayName,
-            profile.ExternalUrls.FirstOrDefault().Value,
-            profile.Images.LastOrDefault()?.Url));
-        }
-        catch (APIUnauthorizedException error)
-        {
-          return Unauthorized(error.Message);
-        }
-        catch (Exception error)
+        if (!result.IsSuccess)
         {
           return StatusCode(
-            StatusCodes.Status500InternalServerError,
-            error.Message);
+            result.Error!.Status,
+            result.Error!.Message);
         }
+        return Ok(result.Ok!);
       }
 
       [HttpGet("signout")]
@@ -54,8 +32,6 @@ namespace SparkStatsAPI
         await HttpContext.SignOutAsync();
         return Redirect("/");
       }
-
-      private readonly SpotifyClientBuilder _builder = builder;
     }
   }
 }

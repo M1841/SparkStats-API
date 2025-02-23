@@ -10,8 +10,9 @@ namespace SparkStatsAPI
 
       public static Result<T> Success(T result)
         => new(result, null);
-      public static Result<T> Failure(Error error)
-        => new(default, error);
+      public static Result<T> Failure(string message, int status)
+        => new(default,
+        new Error(message, status));
     }
 
     public record Error(string Message, int Status);

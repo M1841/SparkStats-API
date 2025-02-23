@@ -13,9 +13,8 @@ namespace SparkStatsAPI
           || !authHeader.StartsWith("Bearer "))
         {
           return Result<SpotifyClient>.Failure(
-            new Error(
-              "Invalid authorization header",
-              StatusCodes.Status400BadRequest));
+            "Invalid authorization header",
+            StatusCodes.Status400BadRequest);
         }
         var token = authHeader["Bearer ".Length..];
 

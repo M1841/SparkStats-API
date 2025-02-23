@@ -1,7 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
-using SparkStatsAPI.Utils;
-using SparkStatsAPI.Extensions;
 using SpotifyAPI.Web;
+using SparkStatsAPI.Services;
 
 namespace SparkStatsAPI
 {
@@ -9,66 +8,23 @@ namespace SparkStatsAPI
   {
     [Route("[controller]")]
     [ApiController]
-    public class GenreController(
-      SpotifyClientBuilder builder
-    ) : ControllerBase
+    public class GenreController(GenreService genreService) : ControllerBase
     {
       [HttpGet("top")]
       public async Task<IActionResult> GetTop(TimeRange range,
         [FromHeader(Name = "Authorization")] string authHeader)
       {
-        try
-        {
-          var buildResult = _buider.Build(authHeader);
-          if (!buildResult.IsSuccess)
-          {
-            return StatusCode(
-              buildResult.Error!.Status,
-              buildResult.Error.Message);
-          }
-          var spotify = buildResult.Ok!;
+        var result =
+          await genreService.GetTop(range, authHeader);
 
-          var request = new UsersTopItemsRequest(range)
-          { Limit = 50 };
-          var response = await spotify.UserProfile.GetTopArtists(request);
-
-          var paging = PagingAdapter.ArtistPages(response);
-
-          var genres = new Dictionary<string, int>();
-          await foreach (var artist in spotify.Paginate(paging))
-          {
-            foreach (var genre in artist.Genres)
-            {
-              var genreTitleCase = genre.ToTitleCase();
-              if (!genres.TryAdd(genreTitleCase, 1))
-              {
-                genres[genreTitleCase]++;
-              }
-            }
-            if (genres.Count == 100) { break; }
-          }
-
-          return Ok(genres
-            .OrderByDescending(genre
-              => genre.Value)
-            .Select(genre
-              => new GenreSimple(
-                genre.Key,
-                genre.Value))
-            .ToList());
-        }
-        catch (APIUnauthorizedException error)
-        {
-          return Unauthorized(error.Message);
-        }
-        catch (Exception error)
+        if (!result.IsSuccess)
         {
           return StatusCode(
-            StatusCodes.Status500InternalServerError,
-            error.Message);
+            result.Error!.Status,
+            result.Error!.Message);
         }
+        return Ok(result.Ok!);
       }
-      private readonly SpotifyClientBuilder _buider = builder;
     }
   }
 }
