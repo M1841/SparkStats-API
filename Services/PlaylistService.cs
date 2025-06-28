@@ -10,7 +10,6 @@ namespace SparkStatsAPI
     {
       public async Task<Result<PlaylistSimple[]>> GetAll(string authHeader)
       {
-
         try
         {
           var buildResult = builder.Build(authHeader);
@@ -80,7 +79,7 @@ namespace SparkStatsAPI
 
           var createRequest = new PlaylistCreateRequest(
             (playlist.Name ?? "") + " - Shuffled")
-          { Public = false };
+          { Public = false, Collaborative = false, Description = "" };
 
           var newPlaylist = await spotify
             .Playlists.Create(userId, createRequest);
